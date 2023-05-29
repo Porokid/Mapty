@@ -19,6 +19,6 @@ if (navigator.geolocation)
       console.log(latitude, longitude);
     },
     function () {
-      console.log(`could not get position`);
+      alert(`could not get position`);
     }
   );
