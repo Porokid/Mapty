@@ -54,9 +54,6 @@ class Cycling extends Workout {
   }
 }
 
-const run1 = new Running([39, -12], 5.2, 24, 178);
-const cycle1 = new Cycling([39, -12], 5.2, 24, 178);
-
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
 // APPLICATION
@@ -75,6 +72,10 @@ class App {
   #workouts = [];
 
   constructor() {
+    // get users position from local storage
+    this._getLocalStorage();
+
+    // Attach event handlers
     this._getPosition();
     form.addEventListener(`submit`, this._newWorkout.bind(this));
     inputType.addEventListener(`change`, this._toggleElevationField.bind(this));
@@ -95,7 +96,6 @@ class App {
   _loadMap(position) {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
-    console.log(latitude, longitude);
 
     const coords = [latitude, longitude];
 
@@ -107,6 +107,10 @@ class App {
     }).addTo(this.#map);
 
     this.#map.on(`click`, this._showForm.bind(this));
+
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work);
+    });
   }
 
   _showForm(mapE) {
@@ -167,7 +171,6 @@ class App {
 
     // add new object to workout array
     this.#workouts.push(workout);
-    console.log(workout);
 
     // render workout on map as marker
 
@@ -178,6 +181,9 @@ class App {
 
     //hide form + clear input field
     this._hideForm();
+
+    // set local storage to all workouts
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -262,8 +268,29 @@ class App {
         duration: 1,
       },
     });
+
     // public interface
-    workout.click();
+    // workout.click();
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem(`workouts`, JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem(`workouts`));
+
+    if (!data) return;
+    this.#workouts = data;
+
+    this.#workouts.forEach(work => {
+      this._renderWorkout(work);
+    });
+  }
+
+  reset() {
+    localStorage.removeItem(`workouts`);
+    location.reload();
   }
 }
 
